@@ -4,21 +4,20 @@ import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.TimerScheduler;
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
-
-import static akka.pattern.Patterns.pipe;
 
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
+import static akka.pattern.Patterns.pipe;
 
 public class IotHubDeviceActor {
 
@@ -74,6 +73,7 @@ public class IotHubDeviceActor {
         var requestSpan = tracer.spanBuilder("IotHub.sendEventAsync").startSpan();
         requestSpan.setAttribute(SemanticAttributes.MESSAGING_SYSTEM, "Azure IoT Hub");
         requestSpan.setAttribute(SemanticAttributes.MESSAGING_MESSAGE_ID, messageId);
+        requestSpan.setAttribute(SemanticAttributes.MESSAGING_PROTOCOL, "MQTT");
         client.sendEventAsync(msg, (message, e, o) -> {
             sendFuture.complete(null);
             requestSpan.end();
