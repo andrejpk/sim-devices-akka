@@ -13,6 +13,6 @@ import javax.validation.constraints.NotNull;
 @Validated
 @ConfigurationProperties(prefix="app")
 public class SimDevicesConfiguration {
-    @NotNull @NotBlank
+    @NotBlank
     public String iotHubConnectionString;
 }
